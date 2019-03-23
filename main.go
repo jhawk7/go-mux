@@ -1,12 +1,18 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
+
+type Response struct {
+	Status int    `json:status`
+	Body   string `json:body`
+}
 
 func main() {
 	router := mux.NewRouter()
@@ -17,11 +23,27 @@ func main() {
 }
 
 func RootHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, "Welcome to go-mux!")
+	response := &Response{
+		Status: http.StatusOK,
+		Body:   "Welcome to go-mux!",
+	}
+	data, _ := json.Marshal(response)
+	w.WriteHeader(response.Status)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(data)
+	//json.NewEncoder(w).Encode("Welcome to go-mux!")
+	//fmt.Fprint(w, "Welcome to go-mux!")
 }
 
 func HealthCheck(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, "go-mux is up!")
+	response := &Response{
+		Status: http.StatusOK,
+		Body:   "go-mux is up!",
+	}
+	data, _ := json.Marshal(response)
+	w.WriteHeader(response.Status)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(data)
+	//json.NewEncoder(w).Encode("Welcome to go-mux!")
+	//fmt.Fprint(w, "go-mux is up!")
 }
