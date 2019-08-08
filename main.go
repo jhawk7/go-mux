@@ -15,8 +15,8 @@ type Response struct {
 }
 
 type User struct {
-	Name	string 	`json:"name"`
-	Age		int 	`json:"age"`
+	Name string `json:"name"`
+	Age  int    `json:"age"`
 }
 
 func main() {
@@ -24,6 +24,7 @@ func main() {
 	fmt.Println("Listening on port 8888...")
 	router.HandleFunc("/", RootHandler).Methods("GET")
 	router.HandleFunc("/isgomuxup", HealthCheck).Methods("GET")
+	router.HandleFunc("/gomuxisbonkers", Return500).Methods("GET")
 	router.HandleFunc("/sendUsers", ProcessUsers).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8888", router))
 }
@@ -81,6 +82,23 @@ func ProcessUsers(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(err)
 	} else {
 		fmt.Printf("%+v\n", users)
+		w.WriteHeader(response.Status)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(data)
+	}
+}
+
+func Return500(w http.ResponseWriter, r *http.Request) {
+	response := &Response{
+		Status: http.StatusInternalServerError,
+		Body:   "go-mux is errant!",
+	}
+	data, jsonErr := json.Marshal(response)
+	if jsonErr != nil {
+		fmt.Printf("Error creating response")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(jsonErr)
+	} else {
 		w.WriteHeader(response.Status)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(data)
